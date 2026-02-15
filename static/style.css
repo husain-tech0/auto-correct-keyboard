@@ -1,0 +1,89 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  height: 100vh;
+  background: linear-gradient(to right, #0f172a, #1e293b);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  width: 480px;
+  background: #111827;
+  padding: 35px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.7);
+}
+
+.card h1 {
+  color: white;
+  margin-bottom: 20px;
+  font-size: 28px;
+}
+
+#wordInput {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+#correctBtn {
+  padding: 10px 30px;
+  background: #0284c7;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+#correctBtn:hover {
+  background: #0369a1;
+}
+
+h2 {
+  margin-top: 25px;
+  color: white;
+  font-size: 20px;
+}
+
+#bestCorrection {
+  margin-top: 10px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #22c55e;
+}
+
+#suggestionsList {
+  list-style: none;
+  margin-top: 15px;
+  padding: 0;
+}
+
+#suggestionsList li {
+  background: #1f2937;
+  margin: 6px 0;
+  padding: 10px;
+  border-radius: 10px;
+  color: white;
+  font-size: 16px;
+}
