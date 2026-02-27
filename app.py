@@ -1,25 +1,27 @@
 from flask import Flask, render_template, request, jsonify
-from difflib import get_close_matches
+from spellchecker import SpellChecker
 import os
 
 app = Flask(__name__)
 
-# ✅ Absolute path for words.txt
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-WORDS_FILE = os.path.join(BASE_DIR, "words.txt")
+# 🔥 Initialize SpellChecker
+spell = SpellChecker(distance=2)
 
-# Load words from words.txt
-def load_words():
-    try:
-        with open(WORDS_FILE, "r", encoding="utf-8") as f:
-            return [line.strip().lower() for line in f.readlines() if line.strip()]
-    except FileNotFoundError:
-        print("❌ words.txt file not found at:", WORDS_FILE)
-        return []
+# 🔥 Load large dictionary
+if os.path.exists("words.txt"):
+    spell.word_frequency.load_text_file("words.txt")
 
-word_list = load_words()
+# 🔥 Boost important technical words (very important!)
+important_words = [
+    "python", "flask", "django", "numpy", "pandas",
+    "javascript", "html", "css", "react", "node",
+    "machine", "learning", "nlp", "artificial",
+    "intelligence", "backend", "frontend",
+    "database", "api", "github"
+]
 
-print("✅ Total words loaded:", len(word_list))
+for word in important_words:
+    spell.word_frequency.add(word, 100000)  # Very high frequency
 
 
 @app.route("/")
@@ -27,32 +29,48 @@ def index():
     return render_template("index.html")
 
 
+def smart_correct(word):
+    """
+    Smarter correction logic
+    """
+
+    if word in spell:
+        return word
+
+    candidates = spell.candidates(word)
+
+    if not candidates:
+        return word
+
+    # Pick highest frequency candidate
+    best = max(candidates, key=lambda w: spell.word_frequency[w])
+
+    return best
+
+
 @app.route("/correct", methods=["POST"])
 def correct():
     data = request.get_json()
 
-    if not data or "word" not in data:
-        return jsonify({
-            "best_correction": "No word received!",
-            "suggestions": []
-        })
+    if not data or "text" not in data:
+        return jsonify({"corrected": ""})
 
-    word = data["word"].strip().lower()
+    text = data["text"].strip().lower()
 
-    if word == "":
-        return jsonify({
-            "best_correction": "Please type a word!",
-            "suggestions": []
-        })
+    if text == "":
+        return jsonify({"corrected": ""})
 
-    suggestions = get_close_matches(word, word_list, n=5, cutoff=0.6)
-    best = suggestions[0] if suggestions else "No correction found"
+    words = text.split()
+    corrected_words = []
 
-    return jsonify({
-        "best_correction": best,
-        "suggestions": suggestions
-    })
+    for word in words:
+        corrected_words.append(smart_correct(word))
+
+    corrected_text = " ".join(corrected_words)
+
+    return jsonify({"corrected": corrected_text})
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port, debug=True)

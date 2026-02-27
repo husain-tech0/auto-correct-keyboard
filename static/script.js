@@ -1,48 +1,30 @@
-document.addEventListener("DOMContentLoaded", function () {
+const input = document.getElementById("textInput");
+const output = document.getElementById("outputText");
 
-  const wordInput = document.getElementById("wordInput");
-  const correctBtn = document.getElementById("correctBtn");
-  const bestCorrection = document.getElementById("bestCorrection");
-  const suggestionsList = document.getElementById("suggestionsList");
+let timeout = null;
 
-  correctBtn.addEventListener("click", function () {
+input.addEventListener("input", function () {
 
-    const word = wordInput.value.trim();
+  clearTimeout(timeout);
 
-    console.log("Button clicked, sending request...");
+  timeout = setTimeout(() => {
 
     fetch("/correct", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ word: word })
+      body: JSON.stringify({ text: input.value })
     })
-      .then((response) => response.json())
-      .then((data) => {
+    .then(res => res.json())
+    .then(data => {
+      output.style.opacity = 0;
+      setTimeout(() => {
+        output.textContent = data.corrected;
+        output.style.opacity = 1;
+      }, 200);
+    });
 
-        console.log("Data received:", data);
-
-        bestCorrection.innerText = data.best_correction;
-
-        suggestionsList.innerHTML = "";
-
-        if (data.suggestions.length > 0) {
-          data.suggestions.forEach((item) => {
-            const li = document.createElement("li");
-            li.innerText = item;
-            suggestionsList.appendChild(li);
-          });
-        } else {
-          suggestionsList.innerHTML = "<li>No suggestions found</li>";
-        }
-      })
-      .catch((error) => {
-        console.log("Fetch Error:", error);
-        bestCorrection.innerText = "Server not connected!";
-        suggestionsList.innerHTML = "<li>Backend error</li>";
-      });
-
-  });
+  }, 400); // slight delay for smooth typing
 
 });
